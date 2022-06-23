@@ -1,9 +1,11 @@
 {
-  "private": true,
+  "name": "@adamburgess/cloudflare-pages-direct-uploader",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "build": "esbuild index.ts --platform=node --outfile=index.js --log-level=warning",
-    "types": "tsc"
+    "types": "tsc",
+    "prepublishOnly": "npm run build && npm run types"
   },
   "dependencies": {
     "@adamburgess/linq": "^3.0.0",
