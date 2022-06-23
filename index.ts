@@ -1,4 +1,5 @@
-import { basename, extname } from 'path'
+import { basename, extname, resolve } from 'path'
+import { readdir, readFile } from 'fs/promises'
 import { hash as blake3hash } from 'blake3-wasm'
 import * as mime from 'mime'
 import from from '@adamburgess/linq'
@@ -178,10 +179,31 @@ export class CloudflarePagesDirectUploader {
     constructor(private config: CloudflarePagesDirectUploaderOptions) {
     }
 
-    // async deployDirectory(directoryPath: string, options?: DeploymentOptions) {
-    //     if (!directoryPath.endsWith('/')) directoryPath += '/';
-    //     const filenames = await readdir(directoryPath, { })
-    // }
+    async deployDirectory(directoryPath: string, options?: DeploymentOptions) {
+        async function* readDirRecursive(path: string): AsyncIterable<string> {
+            const dirents = await readdir(path, { withFileTypes: true });
+            for (const dirent of dirents) {
+                const res = resolve(path, dirent.name);
+                if (dirent.isDirectory()) {
+                    yield* readDirRecursive(res);
+                } else {
+                    yield res;
+                }
+            }
+        }
+
+        const base = resolve(directoryPath);
+        const files: [string, string][] = [];
+        for await (const file of readDirRecursive(base)) files.push([file, file.substring(base.length + 1)]);
+
+        return this.deployFiles(
+            files.map(([filename, url]) => ({
+                filename: url,
+                content: () => readFile(filename)
+            }))
+        );
+    }
+
     async deployFiles(files: DeploymentFile[], options?: DeploymentOptions): Promise<Deployment> {
         const jwt = new JWTCache();
 
