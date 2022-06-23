@@ -1,0 +1,19 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "esbuild index.ts --platform=node --outfile=index.js --log-level=warning",
+    "types": "tsc"
+  },
+  "dependencies": {
+    "@adamburgess/linq": "^3.0.0",
+    "blake3-wasm": "^2.1.5",
+    "mime": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/mime": "^2.0.3",
+    "@types/node": "^18.0.0",
+    "esbuild": "^0.14.47",
+    "typescript": "^4.7.4"
+  }
+}
