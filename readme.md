@@ -11,7 +11,6 @@ Usage:
 ```ts
 import CFPagesUploader from '@adamburgess/cloudflare-pages-direct-uploader'
 
-
 const uploader = new CFPagesUploader({
     // create an API Token with the "Account.Cloudflare Pages" permission, or use your global API key
     apiKey: 'XXXXXXXXX',
@@ -35,7 +34,6 @@ const options = {
 // to upload a directory:
 const deployment = await uploader.deployDirectory(directoryPath, options);
 
-// when uploading a list of files, you can:
 // to upload a list of files:
 const files = [
     // normal usage, specify filename and content as a Buffer.
@@ -48,10 +46,9 @@ const files = [
     { filename: 'large-file.zip', content: () => readFile('large-file.zip'), hash: 'XXXXXX' }
 ];
 const deployment = await uploader.deployFiles(files, options);
-console.log(deployment);
 /* deployment is: {
-    id: string
-    url: string
+    url: link to the deployed page
+    id: the unique id of this deployment
     hashes: a map of filename -> hash
 }
 */
