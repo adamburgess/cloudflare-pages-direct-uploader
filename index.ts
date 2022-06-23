@@ -167,6 +167,7 @@ export interface DeploymentOptions {
     headers?: string
     redirects?: string
     worker?: string
+    log?: (msg: string) => unknown
 }
 
 export interface CloudflarePagesDirectUploaderOptions {
@@ -222,6 +223,7 @@ export class CloudflarePagesDirectUploader {
 
     async deployFiles(files: DeploymentFile[], options?: DeploymentOptions): Promise<Deployment> {
         const jwt = new JWTCache();
+        const log = options?.log ?? (msg => undefined);
 
         // compute the hashes
         for (const file of files) {
@@ -242,10 +244,12 @@ export class CloudflarePagesDirectUploader {
         // upload missing files
         for (const missingHash of missingHashes) {
             const file = filesWithHash.find(x => x.hash === missingHash)!;
+            log(`file ${file.filename}/${file.hash} missing, uploading.`)
             const contentBase64 = file.contentBase64 ?? (await file.content()).toString('base64');
             const contentType = file.contentType ?? getType(file.filename) ?? 'application/octet-stream';
 
             await uploadFile(jwt, [{ contentBase64, contentType, hash: file.hash }], this.config);
+            log(`uploaded file ${file.filename}/${file.hash}`);
         }
 
         // upsert the new list of hashes
