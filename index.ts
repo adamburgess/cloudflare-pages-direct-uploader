@@ -124,7 +124,7 @@ class JWTCache {
             const parsed = JSON.parse(json) as { exp: number };
             this.jwt = {
                 jwt,
-                expiry: new Date(parsed.exp * 1000)
+                expiry: new Date(parsed.exp * 1000 - 60000)
             };
         }
         return this.jwt.jwt;
@@ -192,14 +192,29 @@ export class CloudflarePagesDirectUploader {
             }
         }
 
+        if (!options) options = {};
+
         const base = resolve(directoryPath);
         const files: [string, string][] = [];
-        for await (const file of readDirRecursive(base)) files.push([file, file.substring(base.length + 1)]);
+        for await (const file of readDirRecursive(base)) {
+            const relative = file.substring(base.length + 1);
+            if (relative === '_headers') {
+                if (!options.headers) options.headers = await readFile(file, 'utf8');
+                continue;
+            } else if (relative === '_redirects') {
+                if (!options.redirects) options.redirects = await readFile(file, 'utf8');
+                continue;
+            } else if (relative === '_worker.js') {
+                if (!options.worker) options.worker = await readFile(file, 'utf8');
+                continue;
+            }
+            files.push([file, relative]);
+        }
 
         return this.deployFiles(
-            files.map(([filename, url]) => ({
-                filename: url,
-                content: () => readFile(filename)
+            files.map(([fn, relative]) => ({
+                filename: relative,
+                content: () => readFile(fn)
             }))
         );
     }
