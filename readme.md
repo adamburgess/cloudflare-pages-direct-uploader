@@ -6,7 +6,7 @@ Uploads a list of files or a directory directly to Cloudflare Pages using the [D
 
 Warning: Currently the API routes used are not documented/private. This could break at any time.
 
-If you are using this on a version of Node <18, you must polyfill the global namespace with your own `fetch`, `FormData`, and `File`, e.g. with `undici`.
+If you are using this on a version of Node <18, you must polyfill the global namespace with your own `fetch`, `FormData`, and `Blob`, e.g. with `undici`.
 
 Usage:
 

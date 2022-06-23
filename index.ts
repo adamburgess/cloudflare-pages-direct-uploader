@@ -215,7 +215,8 @@ export class CloudflarePagesDirectUploader {
             files.map(([fn, relative]) => ({
                 filename: relative,
                 content: () => readFile(fn)
-            }))
+            })),
+            options
         );
     }
 
@@ -267,13 +268,13 @@ export class CloudflarePagesDirectUploader {
             formData.append('commit_hash', options.commitHash);
         }
         if (options?.headers) {
-            formData.append('_headers', new File([options.headers], '_headers'));
+            formData.append('_headers', new Blob([options.headers]), '_headers');
         }
         if (options?.redirects) {
-            formData.append('_redirects', new File([options.redirects], '_redirects'));
+            formData.append('_redirects', new Blob([options.redirects]), '_redirects');
         }
         if (options?.worker) {
-            formData.append('_worker.js', new File([options.worker], '_worker.js'));
+            formData.append('_worker.js', new Blob([options.worker]), '_worker.js');
         }
 
         const deployment = await createDeployment(formData, this.config);
