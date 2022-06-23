@@ -2,6 +2,8 @@
 
 Uploads a list of files or a directory directly to Cloudflare Pages using the [Direct Upload](https://developers.cloudflare.com/pages/platform/direct-upload/) Wrangler API.
 
+[![npm version](https://img.shields.io/npm/v/@adamburgess/cloudflare-pages-direct-uploader)](https://www.npmjs.com/package/@adamburgess/cloudflare-pages-direct-uploader) [![npm type definitions](https://img.shields.io/npm/types/@adamburgess/cloudflare-pages-direct-uploader)](https://unpkg.com/browse/@adamburgess/cloudflare-pages-direct-uploader/index.d.ts)
+
 Warning: Currently the API routes used are not documented/private. This could break at any time.
 
 If you are using this on a version of Node <18, you must polyfill the global namespace with your own `fetch`, `FormData`, and `File`, e.g. with `undici`.
