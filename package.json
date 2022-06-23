@@ -1,6 +1,6 @@
 {
   "name": "@adamburgess/cloudflare-pages-direct-uploader",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "license": "MIT",
   "description": "Directly create new Pages deploys using the Cloudflare API",
   "repository": {
@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/adamburgess/cloudflare-pages-direct-uploader#readme",
   "type": "module",
+  "main": "index.js",
   "scripts": {
     "build": "esbuild index.ts --platform=node --outfile=index.js --log-level=warning",
     "types": "tsc",
