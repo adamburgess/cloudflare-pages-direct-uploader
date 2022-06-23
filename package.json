@@ -1,7 +1,23 @@
 {
   "name": "@adamburgess/cloudflare-pages-direct-uploader",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "license": "MIT",
+  "description": "Directly create new Pages deploys using the Cloudflare API",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adamburgess/cloudflare-pages-direct-uploader.git"
+  },
+  "keywords": [
+    "cloudflare",
+    "cloudflare pages",
+    "cloudflare workers"
+  ],
+  "sideEffects": false,
+  "author": "Adam Burgess",
+  "bugs": {
+    "url": "https://github.com/adamburgess/cloudflare-pages-direct-uploader/issues"
+  },
+  "homepage": "https://github.com/adamburgess/cloudflare-pages-direct-uploader#readme",
   "type": "module",
   "scripts": {
     "build": "esbuild index.ts --platform=node --outfile=index.js --log-level=warning",
