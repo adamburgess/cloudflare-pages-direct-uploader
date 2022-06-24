@@ -3,16 +3,20 @@ import { readdir, readFile } from 'fs/promises'
 import { hash as blake3hash } from 'blake3-wasm'
 import * as mime from 'mime'
 import from from '@adamburgess/linq'
+import { setTimeout } from 'timers/promises'
 
 // broken packages are broken dude.
 const getType: typeof mime.getType = 'getType' in mime ? mime.getType : (mime as unknown as { default: typeof mime }).default.getType;
 
 const BASE_URL = 'https://api.cloudflare.com/client/v4';
 
-async function doRequest<T = unknown>(url: string, apiKey: string, options: {
+interface RequestOptions {
     headers?: Record<string, string>,
     body?: any
-} = {}) {
+    log?: (msg: string) => unknown
+}
+
+async function doRequest<T = unknown>(url: string, apiKey: string, options: RequestOptions = {}) {
     url = BASE_URL + url;
     const headers: Record<string, string> = {
         'Authorization': `Bearer ${apiKey}`,
@@ -35,17 +39,35 @@ async function doRequest<T = unknown>(url: string, apiKey: string, options: {
     if (!type || !type.includes('application/json')) {
         throw new Error('expecting json ' + txt);
     }
+
     return JSON.parse(txt) as { result: T, success: true } | { success: false, errors: { code: number, message: string }[] };
 }
 
+async function doRequestWithRetries<T = unknown>(url: string, apiKey: string, options: RequestOptions = {}, retries = 5) {
+    let lastError: unknown;
+    let retryCount = 0;
+    while (retryCount++ !== retries) {
+        try {
+            const result = await doRequest<T>(url, apiKey, options);
+            return result;
+        } catch (e) {
+            lastError = e;
+            const delay = Math.min(Math.pow(retryCount, 2.5), 60) * 1000;
+            (options.log ?? (() => { }))(`Failed to request ${url}, delaying for ${delay} ms: ${e}`);
+            await setTimeout(delay);
+        }
+    }
+    throw lastError;
+}
+
 async function getJwt({ accountId, projectName, apiKey }: CloudflarePagesDirectUploaderOptions) {
-    const res = await doRequest<{ jwt: string }>(`/accounts/${accountId}/pages/projects/${projectName}/upload-token`, apiKey);
+    const res = await doRequestWithRetries<{ jwt: string }>(`/accounts/${accountId}/pages/projects/${projectName}/upload-token`, apiKey);
     if (res.success) return res.result.jwt;
     throw new Error('couldnt get jwt ' + JSON.stringify(res, null, 2));
 }
 
 async function getMissingHashes(jwt: JWTCache, hashes: string[], options: CloudflarePagesDirectUploaderOptions) {
-    const res = await doRequest<string[]>('/pages/assets/check-missing', options.apiKey, {
+    const res = await doRequestWithRetries<string[]>('/pages/assets/check-missing', options.apiKey, {
         headers: {
             'Authorization': `Bearer ${await jwt.get(options)}`
         },
@@ -77,7 +99,7 @@ async function uploadFile(jwt: JWTCache, files: FileWithHash[], options: Cloudfl
     }));
 
     const json = JSON.stringify(payload);
-    const res = await doRequest('/pages/assets/upload', options.apiKey, {
+    const res = await doRequestWithRetries('/pages/assets/upload', options.apiKey, {
         headers: {
             'Authorization': `Bearer ${await jwt.get(options)}`
         },
@@ -89,7 +111,7 @@ async function uploadFile(jwt: JWTCache, files: FileWithHash[], options: Cloudfl
 }
 
 async function upsertHashes(jwt: JWTCache, hashes: string[], options: CloudflarePagesDirectUploaderOptions) {
-    const res = await doRequest('/pages/assets/upsert-hashes', options.apiKey, {
+    const res = await doRequestWithRetries('/pages/assets/upsert-hashes', options.apiKey, {
         headers: {
             'Authorization': `Bearer ${await jwt.get(options)}`
         },
@@ -103,7 +125,7 @@ async function upsertHashes(jwt: JWTCache, hashes: string[], options: Cloudflare
 }
 
 async function createDeployment(body: FormData, { accountId, projectName, apiKey }: CloudflarePagesDirectUploaderOptions) {
-    const res = await doRequest<{ url: string, id: string }>(`/accounts/${accountId}/pages/projects/${projectName}/deployments`, apiKey, {
+    const res = await doRequestWithRetries<{ url: string, id: string }>(`/accounts/${accountId}/pages/projects/${projectName}/deployments`, apiKey, {
         body
     });
 
@@ -167,6 +189,7 @@ export interface DeploymentOptions {
     headers?: string
     redirects?: string
     worker?: string
+    concurrency?: number
     log?: (msg: string) => unknown
 }
 
@@ -242,15 +265,26 @@ export class CloudflarePagesDirectUploader {
         // find missing hashes
         const missingHashes = await getMissingHashes(jwt, grouped.map(g => g.key), this.config);
         // upload missing files
-        for (const missingHash of missingHashes) {
-            const file = filesWithHash.find(x => x.hash === missingHash)!;
-            log(`file ${file.filename}/${file.hash} missing, uploading.`)
-            const contentBase64 = file.contentBase64 ?? (await file.content()).toString('base64');
-            const contentType = file.contentType ?? getType(file.filename) ?? 'application/octet-stream';
+        // do four at a time.
+        const concurrency = Math.min(options?.concurrency ?? 4, 1);
+        const promises: Promise<void>[] = [];
+        const hashesToUpload = missingHashes.slice();
+        for (let i = 0; i < concurrency; i++) {
+            promises.push((async () => {
+                while (hashesToUpload.length > 0) {
+                    const missingHash = hashesToUpload.pop()!;
 
-            await uploadFile(jwt, [{ contentBase64, contentType, hash: file.hash }], this.config);
-            log(`uploaded file ${file.filename}/${file.hash}`);
+                    const file = filesWithHash.find(x => x.hash === missingHash)!;
+                    log(`file ${file.filename}/${file.hash} missing, uploading.`)
+                    const contentBase64 = file.contentBase64 ?? (await file.content()).toString('base64');
+                    const contentType = file.contentType ?? getType(file.filename) ?? 'application/octet-stream';
+
+                    await uploadFile(jwt, [{ contentBase64, contentType, hash: file.hash }], this.config);
+                    log(`uploaded file ${file.filename}/${file.hash}`);
+                }
+            })());
         }
+        await Promise.all(promises);
 
         // upsert the new list of hashes
         if (missingHashes.length) {
