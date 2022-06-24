@@ -3,5 +3,5 @@
 index.ts
 pnpm-lock.yaml
 tsconfig.json
-test.js
+test*.js
 test
