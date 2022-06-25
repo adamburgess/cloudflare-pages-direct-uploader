@@ -1,6 +1,6 @@
 # @adamburgess/cloudflare-pages-direct-uploader
 
-Uploads a list of files or a directory directly to Cloudflare Pages using the [Direct Upload](https://developers.cloudflare.com/pages/platform/direct-upload/) Wrangler API.
+Uploads a list of files or a directory directly to [Cloudflare Pages](https://pages.cloudflare.com/) using the [Direct Upload](https://developers.cloudflare.com/pages/platform/direct-upload/) Wrangler API.
 
 [![npm version](https://img.shields.io/npm/v/@adamburgess/cloudflare-pages-direct-uploader)](https://www.npmjs.com/package/@adamburgess/cloudflare-pages-direct-uploader) [![npm type definitions](https://img.shields.io/npm/types/@adamburgess/cloudflare-pages-direct-uploader)](https://unpkg.com/browse/@adamburgess/cloudflare-pages-direct-uploader/index.d.ts)
 
