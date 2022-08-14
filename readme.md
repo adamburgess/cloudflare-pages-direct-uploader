@@ -29,7 +29,7 @@ const options = {
     headers: 'Contents of the _headers file',
     redirects: 'Contents of the _redirects file',
     worker: 'Contents of the _worker.js file',
-    routes: 'Contents of the _routest.json file'
+    routes: 'Contents of the _routes.json file'
 }
 // note: when deploying a directory, the headers/redirects/worker files will be read from the disk.
 //       they don't need to be specified.
