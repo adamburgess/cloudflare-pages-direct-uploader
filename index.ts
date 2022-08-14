@@ -188,6 +188,7 @@ export interface DeploymentOptions {
     commitHash?: string
     headers?: string
     redirects?: string
+    routes?: string
     worker?: string
     concurrency?: number
     log?: (msg: string) => unknown
@@ -230,6 +231,9 @@ export class CloudflarePagesDirectUploader {
                 continue;
             } else if (relative === '_worker.js') {
                 if (!options.worker) options.worker = await readFile(file, 'utf8');
+                continue;
+            } else if (relative === '_routes.json') {
+                if (!options.routes) options.routes = await readFile(file, 'utf8');
                 continue;
             }
             files.push([file, relative]);
@@ -313,6 +317,9 @@ export class CloudflarePagesDirectUploader {
         }
         if (options?.worker) {
             formData.append('_worker.js', new Blob([options.worker]), '_worker.js');
+        }
+        if (options?.routes) {
+            formData.append('_routes.json', new Blob([options.routes]), '_routes.json');
         }
 
         const deployment = await createDeployment(formData, this.config);
