@@ -270,7 +270,7 @@ export class CloudflarePagesDirectUploader {
         const missingHashes = await getMissingHashes(jwt, grouped.map(g => g.key), this.config);
         // upload missing files
         // do four at a time.
-        const concurrency = Math.min(options?.concurrency ?? 4, 1);
+        const concurrency = Math.max(options?.concurrency ?? 4, 1);
         const promises: Promise<void>[] = [];
         const hashesToUpload = missingHashes.slice();
         for (let i = 0; i < concurrency; i++) {
