@@ -57,7 +57,7 @@ const deployment = await uploader.deployFiles(files, options);
 */
 ```
 
-### How to precompute the hash
+##### How to precompute the hash
 
 If you don't know the hash for a file, just omit it, and then read the deployment object which has the hash.
 
