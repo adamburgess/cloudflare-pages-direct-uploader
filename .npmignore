@@ -1,6 +1,7 @@
 .gitignore
 .npmignore
 index.ts
+cli.ts
 pnpm-lock.yaml
 tsconfig.json
 test*.js

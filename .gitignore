@@ -1,4 +1,5 @@
 node_modules
+cli.js
 index.js
 index.d.ts
 test*.js

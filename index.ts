@@ -6,6 +6,7 @@ import from from '@adamburgess/linq'
 import { setTimeout } from 'timers/promises'
 
 // broken packages are broken dude.
+// @ts-ignore
 const getType: typeof mime.getType = 'getType' in mime ? mime.getType : (mime as unknown as { default: typeof mime }).default.getType;
 
 const BASE_URL = 'https://api.cloudflare.com/client/v4';
@@ -20,7 +21,7 @@ async function doRequest<T = unknown>(url: string, apiKey: string, options: Requ
     url = BASE_URL + url;
     const headers: Record<string, string> = {
         'Authorization': `Bearer ${apiKey}`,
-        'User-Agent': '@adamburgess/cloudflare-pages-direct-upload@1.6.0',
+        'User-Agent': '@adamburgess/cloudflare-pages-direct-upload@1.7.0',
         ...options.headers
     };
 
