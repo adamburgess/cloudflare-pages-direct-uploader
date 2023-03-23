@@ -8,7 +8,12 @@ Warning: Currently the API routes used are not documented/private. This could br
 
 If you are using this on a version of Node <18, you must polyfill the global namespace with your own `fetch`, `FormData`, and `Blob`, e.g. with `undici`.
 
-Usage:
+Usage (CLI):
+
+`CF_API_TOKEN=token CF_ACCOUNT_ID=id cloudflare-pages-direct-upload PROJECT [DIRECTORY]`  
+If directory is not specified, the current directory is used.
+
+Usage (API):
 
 ```ts
 import CFPagesUploader from '@adamburgess/cloudflare-pages-direct-uploader'
