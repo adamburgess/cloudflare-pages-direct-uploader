@@ -10,8 +10,9 @@ If you are using this on a version of Node <18, you must polyfill the global nam
 
 Usage (CLI):
 
-`CF_API_TOKEN=token CF_ACCOUNT_ID=id cloudflare-pages-direct-upload PROJECT [DIRECTORY]`  
+`CF_API_TOKEN=token CF_ACCOUNT_ID=id cloudflare-pages-direct-upload [--branch=BRANCH] PROJECT [DIRECTORY]`  
 If directory is not specified, the current directory is used.
+A branch can be used for deploy previews.
 
 Usage (API):
 

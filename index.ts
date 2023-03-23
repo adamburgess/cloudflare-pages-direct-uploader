@@ -21,7 +21,7 @@ async function doRequest<T = unknown>(url: string, apiKey: string, options: Requ
     url = BASE_URL + url;
     const headers: Record<string, string> = {
         'Authorization': `Bearer ${apiKey}`,
-        'User-Agent': '@adamburgess/cloudflare-pages-direct-upload@1.7.0',
+        'User-Agent': '@adamburgess/cloudflare-pages-direct-upload@1.7.1',
         ...options.headers
     };
 
